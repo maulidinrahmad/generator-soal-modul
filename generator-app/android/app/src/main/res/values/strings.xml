@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">generator-soal-modul-app</string>
+    <string name="title_activity_main">generator-soal-modul-app</string>
+    <string name="package_name">com.rmaulidin.generatorSoalModul</string>
+    <string name="custom_url_scheme">com.rmaulidin.generatorSoalModul</string>
+</resources>

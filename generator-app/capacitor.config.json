@@ -1,0 +1,15 @@
+{
+  "appId": "com.rmaulidin.generatorSoalModul",
+  "appName": "generator-soal-modul-app",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#ffffffff",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    }
+  }
+}
+
