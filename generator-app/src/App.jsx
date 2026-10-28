@@ -37,6 +37,7 @@ function App() {
 
   // Cek Whitelist ke Firestore
   const checkUserWhitelist = async (email) => {
+    if (!email) return;
     setCheckingWhitelist(true);
     try {
       const docRef = doc(db, 'whitelist', email.toLowerCase().trim());
@@ -53,6 +54,19 @@ function App() {
     } finally {
       setCheckingWhitelist(false);
     }
+  };
+
+  // Fungsi Konfirmasi via WhatsApp ke Admin
+  const handleHubungiAdminWA = () => {
+    const ADMIN_PHONE_NUMBER = "6282340149210"; 
+    const userEmail = user?.email || "Email tidak terdeteksi";
+
+    const pesanWA = `Halo Admin, saya telah mendaftar di Aplikasi Generator Modul KBC.%0A%0A` +
+      `Email Akun: *${userEmail}*%0A%0A` +
+      `Mohon bantuannya untuk mengaktifkan lisensi akses whitelist saya. Terima kasih.`;
+
+    const urlWA = `https://wa.me/${ADMIN_PHONE_NUMBER}?text=${pesanWA}`;
+    window.open(urlWA, '_blank');
   };
 
   const handleAuthSubmit = async (e) => {
@@ -76,7 +90,7 @@ function App() {
     await logoutAccount();
   };
 
-  // API Key terpusat dari .env atau fallback
+  // API Key terpusat dari .env atau Vercel Environment Variables
   const getApiKey = () => {
     return import.meta.env.VITE_GEMINI_API_KEY || '';
   };
@@ -113,7 +127,7 @@ function App() {
     e.preventDefault();
     const apiKey = getApiKey();
     if (!apiKey) {
-      alert('API Key Gemini sistem belum diset di file .env (VITE_GEMINI_API_KEY).');
+      alert('API Key Gemini sistem belum diset di file .env atau Vercel (VITE_GEMINI_API_KEY).');
       return;
     }
 
@@ -218,7 +232,7 @@ BAGIAN 4: INSTRUMEN DAN PEDOMAN PENILAIAN
     e.preventDefault();
     const apiKey = getApiKey();
     if (!apiKey) {
-      alert('API Key Gemini sistem belum diset di file .env (VITE_GEMINI_API_KEY).');
+      alert('API Key Gemini sistem belum diset di file .env atau Vercel (VITE_GEMINI_API_KEY).');
       return;
     }
 
@@ -282,6 +296,7 @@ Ketentuan Format:
     document.body.removeChild(a);
   };
 
+  // Status Loading Auth
   if (authChecking) {
     return (
       <div className="min-h-screen bg-slate-100 flex items-center justify-center">
@@ -290,7 +305,7 @@ Ketentuan Format:
     );
   }
 
-  // TAMPILAN 1: AUTH
+  // TAMPILAN 1: FORM LOGIN / REGISTER
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-slate-100 flex items-center justify-center p-4">
@@ -299,14 +314,13 @@ Ketentuan Format:
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-3">
               🌱
             </div>
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+            <span className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider block mb-2">
               Buat Soal & Modul Otomatis Berbasis AI
             </span>
-            <br></br>
-            <span className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">
+            <span className="bg-emerald-50 text-emerald-600 text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
               Kurikulum Berbasis Cinta
             </span>
-            <h1 className="text-2xl font-bold text-slate-800 mt-2">
+            <h1 className="text-2xl font-bold text-slate-800 mt-3">
               {isRegisterMode ? 'Daftar Akun Baru' : 'Login Pengguna'}
             </h1>
             <p className="text-slate-500 text-sm mt-1">
@@ -360,7 +374,7 @@ Ketentuan Format:
     );
   }
 
-  // TAMPILAN 2: WHITELIST CHECK
+  // TAMPILAN 2: LOADING CEK WHITELIST
   if (checkingWhitelist) {
     return (
       <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
@@ -370,6 +384,7 @@ Ketentuan Format:
     );
   }
 
+  // TAMPILAN 3: BELUM DI-WHITELIST
   if (!isWhitelisted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-amber-50 to-slate-100 flex items-center justify-center p-4">
@@ -377,33 +392,51 @@ Ketentuan Format:
           <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4">
             🔒
           </div>
+          
           <h1 className="text-2xl font-bold text-slate-800">Akses Belum Diaktifkan</h1>
           <p className="text-slate-600 text-sm mt-2 mb-4">
-            Email (<strong className="text-slate-900">{user.email}</strong>) belum terdaftar dalam daftar whitelist resmi.
+            Email (<strong className="text-slate-900">{user?.email}</strong>) belum terdaftar dalam daftar whitelist resmi.
           </p>
-          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs text-slate-500 mb-6 text-left">
-            💡 <strong>Informasi:</strong> Hubungi admin untuk mengaktifkan lisensi akses akun Anda.
+          
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs text-slate-500 mb-6 text-left leading-relaxed">
+            💡 <strong>Informasi:</strong> Klik tombol hijau di bawah untuk mengirim pesan otomatis ke WhatsApp Admin agar akun Anda segera diaktifkan.
           </div>
 
-          <button
-            onClick={handleLogout}
-            className="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-2xl text-sm transition"
-          >
-            Keluar / Ganti Akun Lain
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={handleHubungiAdminWA}
+              className="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl text-sm transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+            >
+              <span className="text-lg">💬</span> Hubungi Admin via WhatsApp
+            </button>
+
+            <button
+              onClick={() => checkUserWhitelist(user?.email)}
+              className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-2xl text-sm transition"
+            >
+              🔄 Periksa Ulang Status Akun
+            </button>
+
+            <button
+              onClick={handleLogout}
+              className="w-full py-2.5 text-slate-400 hover:text-slate-600 font-medium text-xs transition"
+            >
+              Keluar / Ganti Akun Lain
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // TAMPILAN 3: UTAMA
+  // TAMPILAN 4: DASHBOARD UTAMA
   return (
     <div className="min-h-screen bg-slate-100 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-6 relative flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-emerald-100 text-emerald-700 font-bold rounded-full flex items-center justify-center text-lg">
-              {user.email.charAt(0).toUpperCase()}
+              {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
             </div>
             <div>
               <p className="text-xs text-slate-400 font-medium">Masuk sebagai:</p>
